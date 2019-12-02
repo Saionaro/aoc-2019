@@ -1,26 +1,26 @@
 const data = require("./data").split("\n");
 
+const calcFuelMass = mass => Math.floor(mass / 3) - 2;
+
 // part 1
 
 const sum = data.reduce((sum, mass) => {
   const massInt = parseInt(mass);
 
-  return sum + (Math.floor(massInt / 3) - 2);
+  return sum + calcFuelMass(massInt);
 }, 0);
 
-console.log(sum); //3372695
+console.log(sum); // 3372695
 
 // part 2
 
 const sum2 = data.reduce((sum, mass) => {
   const massInt = parseInt(mass);
-
-  let total = Math.floor(massInt / 3) - 2;
-
+  let total = calcFuelMass(massInt);
   let fuelNeeded = total;
 
   while (fuelNeeded) {
-    fuelNeeded = Math.max(0, Math.floor(fuelNeeded / 3) - 2);
+    fuelNeeded = Math.max(0, calcFuelMass(fuelNeeded));
     total += fuelNeeded;
   }
 
