@@ -39,4 +39,4 @@ for (let i = 0; i < 100; i++) {
   }
 }
 
-console.log(a * 100 + b);
+console.log(a * 100 + b); // 4112
