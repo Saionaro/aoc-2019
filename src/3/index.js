@@ -8,7 +8,7 @@ const usedCoordsA = {};
 const usedCoordsB = {};
 const intersections = [];
 
-const move = ({ x, y }, direction, distance, type) => {
+const move = ({ x, y, steps }, direction, distance, type) => {
   let step = 1;
   let isX = true;
 
@@ -30,6 +30,7 @@ const move = ({ x, y }, direction, distance, type) => {
 
   let newX = x;
   let newY = y;
+  let newSteps = steps;
 
   for (let i = 1; i <= distance; i++) {
     if (isX) {
@@ -37,32 +38,41 @@ const move = ({ x, y }, direction, distance, type) => {
     } else {
       newY += step;
     }
+    newSteps++;
 
     const key = `${newX}-${newY}`;
 
     if (type === "A") {
-      usedCoordsA[key] = true;
+      usedCoordsA[key] = newSteps;
 
       if (usedCoordsB[key]) {
-        intersections.push({ x: newX, y: newY });
+        intersections.push({
+          x: newX,
+          y: newY,
+          steps: newSteps + usedCoordsB[key]
+        });
       }
     } else {
-      usedCoordsB[key] = true;
+      usedCoordsB[key] = newSteps;
 
       if (usedCoordsA[key]) {
-        intersections.push({ x: newX, y: newY });
+        intersections.push({
+          x: newX,
+          y: newY,
+          steps: newSteps + usedCoordsA[key]
+        });
       }
     }
   }
 
-  return { x: newX, y: newY };
+  return { x: newX, y: newY, steps: newSteps };
 };
 
 const getManhattanDistance = ({ x: x1, y: y1 }, { x: x2, y: y2 }) =>
   Math.abs(x1 - x2) + Math.abs(y1 - y2);
 
-let aCoords = { x: 0, y: 0 };
-let bCoords = { x: 0, y: 0 };
+let aCoords = { x: 0, y: 0, steps: 0 };
+let bCoords = { x: 0, y: 0, steps: 0 };
 
 for (let i = 0; i < data[0].length; i++) {
   const directionA = data[0][i][0];
@@ -75,10 +85,16 @@ for (let i = 0; i < data[0].length; i++) {
 }
 
 let minDistance = Infinity;
+let minSteps = Infinity;
 const center = { x: 0, y: 0 };
 
 for (const item of intersections) {
   minDistance = Math.min(minDistance, getManhattanDistance(center, item));
+  minSteps = Math.min(minSteps, item.steps);
 }
 
 console.log(minDistance); // 5357
+
+// part 2
+
+console.log(minSteps); // 101956
