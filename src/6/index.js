@@ -14,6 +14,8 @@ class Body {
 
 const buildTree = () => {
   let COM = null;
+  let YOU = null;
+  let SAN = null;
   const bodyesMap = {};
 
   for (const relationship of data) {
@@ -28,13 +30,16 @@ const buildTree = () => {
 
     if (!bodyesMap[slayTitle]) {
       bodyesMap[slayTitle] = new Body(slayTitle);
+
+      if (slayTitle === "YOU") YOU = bodyesMap[slayTitle];
+      if (slayTitle === "SAN") SAN = bodyesMap[slayTitle];
     }
 
     bodyesMap[masterTitle].satellites.push(bodyesMap[slayTitle]);
     bodyesMap[slayTitle].master = bodyesMap[masterTitle];
   }
 
-  return COM;
+  return { root: COM, YOU, SAN };
 };
 
 const getChecksum = (node, level = 0) => {
@@ -47,4 +52,41 @@ const getChecksum = (node, level = 0) => {
   return level + sum;
 };
 
-console.log(getChecksum(buildTree())); // 292387
+const { root, YOU, SAN } = buildTree();
+
+console.log(getChecksum(root)); // 292387
+
+// part 2
+
+const findPathLen = (nodeA, nodeB) => {
+  let result = -1;
+  const youMap = {};
+  const sanMap = {};
+  let currMaster = YOU.master;
+  let counter = 0;
+
+  // since there is a tree, just find nearest common node and count steps
+
+  while (currMaster) {
+    youMap[currMaster.title] = counter++;
+    currMaster = currMaster.master;
+  }
+
+  currMaster = SAN.master;
+  counter = 0;
+
+  while (currMaster) {
+    sanMap[currMaster.title] = counter++;
+
+    if (youMap[currMaster.title]) {
+      result = youMap[currMaster.title] + sanMap[currMaster.title];
+      break;
+    }
+
+    currMaster = currMaster.master;
+  }
+
+  return result;
+};
+
+console.log(findPathLen(YOU, SAN)); // 433
