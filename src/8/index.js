@@ -49,3 +49,40 @@ const { layers, meta } = splitLayers(data);
 // part 1
 
 console.log(getChecksum(layers, meta)); // 1920
+
+// part 2
+
+const renderImage = layers => {
+  let canvas = "";
+
+  for (let j = 0; j < HEIGHT; j++) {
+    const shift = j * WIDTH;
+
+    for (let i = 0; i < WIDTH; i++) {
+      const coord = shift + i;
+
+      for (const layer of layers) {
+        const pixel = layer[coord];
+
+        if (pixel !== 2) {
+          canvas += String(pixel === 0 ? " " : "0");
+          break;
+        }
+      }
+    }
+
+    canvas += "\n";
+  }
+
+  return canvas;
+};
+
+console.log(renderImage(layers));
+// 000   00  0  0 0     00
+// 0  0 0  0 0  0 0    0  0
+// 0  0 0    0  0 0    0  0
+// 000  0    0  0 0    0000
+// 0    0  0 0  0 0    0  0
+// 0     00   00  0000 0  0
+
+// PCULA
