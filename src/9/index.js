@@ -62,20 +62,12 @@ function* runProgram() {
       }
 
       case 5: {
-        if (p0) {
-          i = p1;
-        } else {
-          i += 3;
-        }
+        i = p0 ? p1 : i + 3;
         break;
       }
 
       case 6: {
-        if (p0) {
-          i += 3;
-        } else {
-          i = p1;
-        }
+        i = p0 ? i + 3 : p1;
         break;
       }
 
