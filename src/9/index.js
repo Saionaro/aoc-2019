@@ -132,3 +132,5 @@ const runBoost = args => {
 };
 
 console.log(runBoost([1])); // [4234906522]
+
+console.log(runBoost([2])); // [60962]
