@@ -138,8 +138,8 @@ const directionsMap = {
   }
 };
 
-const run = () => {
-  const field = { 0: { 0: BLACK } };
+const run = startColor => {
+  const field = { 0: { 0: startColor } };
   const gen = runProgram();
   let val = gen.next();
   let x = 0;
@@ -170,9 +170,53 @@ const run = () => {
     }
   }
 
-  return countSet.size;
+  return { field, count: countSet.size };
 };
 
 // part 1
 
-console.log(run()); // 2392
+console.log(run(BLACK).count); // 2392
+
+// part 2
+const draw = field => {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const key of Object.keys(field)) {
+    const num1 = parseInt(key, 10);
+    minX = Math.min(minX, num1);
+    maxX = Math.max(maxX, num1);
+
+    for (const key2 of Object.keys(field[key])) {
+      const num2 = parseInt(key2, 10);
+      minY = Math.min(minY, num2);
+      maxY = Math.max(maxY, num2);
+    }
+  }
+
+  let canvas = "";
+
+  for (let y = minY; y <= maxY; y++) {
+    for (let x = minX; x <= maxX; x++) {
+      let color = BLACK;
+
+      if (field[x] && field[x][y]) {
+        color = field[x][y];
+      }
+      canvas += color;
+    }
+    canvas += "\n";
+  }
+  return canvas;
+};
+
+console.log(draw(run(WHITE).field)); // EGBHLEUE
+
+// .####..##..###..#..#.#....####.#..#.####...
+// .#....#..#.#..#.#..#.#....#....#..#.#......
+// .###..#....###..####.#....###..#..#.###....
+// .#....#.##.#..#.#..#.#....#....#..#.#......
+// .#....#..#.#..#.#..#.#....#....#..#.#......
+// .####..###.###..#..#.####.####..##..####...
