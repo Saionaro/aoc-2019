@@ -1,8 +1,10 @@
+const ANIMATE = false;
+
 const data = require("./data")
   .split(",")
   .map(num => parseInt(num, 10));
 
-const BLACK = ".";
+const BLACK = " ";
 const WHITE = "#";
 
 const getPosition = (data, mode = "0", index, base = 0) => {
@@ -138,46 +140,8 @@ const directionsMap = {
   }
 };
 
-const run = startColor => {
-  const field = { 0: { 0: startColor } };
-  const gen = runProgram();
-  let val = gen.next();
-  let x = 0;
-  let y = 0;
-  let speed = [0, -1];
-  let countSet = new Set();
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  while (!val.done) {
-    switch (val.value.type) {
-      case "o": {
-        setColor(field, x, y, val.value.val);
-        countSet.add(`${x},${y}`);
-        val = gen.next();
-
-        speed = directionsMap[speed[0]][speed[1]][val.value.val];
-        x += speed[0];
-        y += speed[1];
-        val = gen.next();
-        break;
-      }
-      case "i": {
-        val = gen.next(getColor(field, x, y) === WHITE ? 1 : 0);
-        break;
-      }
-      default: {
-        val = gen.next();
-      }
-    }
-  }
-
-  return { field, count: countSet.size };
-};
-
-// part 1
-
-console.log(run(BLACK).count); // 2392
-
-// part 2
 const draw = field => {
   let minX = Infinity;
   let maxX = -Infinity;
@@ -212,7 +176,62 @@ const draw = field => {
   return canvas;
 };
 
-console.log(draw(run(WHITE).field)); // EGBHLEUE
+const run = startColor => {
+  const field = { 0: { 0: startColor } };
+  const gen = runProgram();
+  let val = gen.next();
+  let x = 0;
+  let y = 0;
+  let speed = [0, -1];
+  let countSet = new Set();
+  const record = [];
+
+  while (!val.done) {
+    switch (val.value.type) {
+      case "o": {
+        setColor(field, x, y, val.value.val);
+        countSet.add(`${x},${y}`);
+        val = gen.next();
+
+        speed = directionsMap[speed[0]][speed[1]][val.value.val];
+        x += speed[0];
+        y += speed[1];
+        val = gen.next();
+        break;
+      }
+      case "i": {
+        val = gen.next(getColor(field, x, y) === WHITE ? 1 : 0);
+        break;
+      }
+      default: {
+        val = gen.next();
+      }
+    }
+
+    if (ANIMATE) record.push(JSON.stringify(field));
+  }
+
+  return { field, count: countSet.size, record };
+};
+
+const reproduce = async fraps => {
+  for (const frap of fraps) {
+    console.log("\n".repeat(50));
+    console.log(draw(JSON.parse(frap)));
+    await delay(11);
+  }
+};
+
+// part 1
+
+const fst = run(BLACK);
+console.log(fst.count); // 2392
+console.log(draw(fst.field));
+
+// part 2
+
+const scd = run(WHITE);
+console.log(draw(scd.field)); // EGBHLEUE
 
 // .####..##..###..#..#.#....####.#..#.####...
 // .#....#..#.#..#.#..#.#....#....#..#.#......
