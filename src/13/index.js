@@ -1,3 +1,6 @@
+const automatic = true;
+const readline = require("readline");
+
 const data = require("./data")
   .split(",")
   .map(num => parseInt(num, 10));
@@ -16,8 +19,9 @@ const getPosition = (data, mode = "0", index, base = 0) => {
 const getValue = (data, mode = "0", index, base = 0) =>
   data[getPosition(data, mode, index, base)];
 
-function* runProgram() {
+function* runProgram(input) {
   const copy = [...data];
+  if (input) copy[0] = input;
   let base = 0;
   let i = 0;
 
@@ -114,6 +118,29 @@ const OBJECTS_DATA = {
   [OBJECTS.BALL]: { symbol: "*" }
 };
 
+const DIRECTIONS = {
+  LEFT: -1,
+  STOP: 0,
+  RIGHT: 1
+};
+
+const DIRECTIONS_DATA = {
+  [DIRECTIONS.LEFT]: {
+    a: true,
+    left: true
+  },
+  [DIRECTIONS.RIGHT]: {
+    d: true,
+    right: true
+  },
+  [DIRECTIONS.STOP]: {
+    w: true,
+    s: true,
+    up: true,
+    down: true
+  }
+};
+
 const run = () => {
   const field = {};
   const gen = runProgram();
@@ -139,17 +166,105 @@ const run = () => {
 
         break;
       }
+    }
+  }
+
+  return { field, size: { x: maxX + 1, y: maxY + 1 } };
+};
+
+const drawField = (field, size, score) => {
+  let canvas = "";
+
+  for (let i = 0; i < size.y; i++) {
+    for (let j = 0; j < size.x; j++) {
+      if (field[i] && field[i][j] && OBJECTS_DATA[field[i][j]]) {
+        canvas += OBJECTS_DATA[field[i][j]].symbol;
+      } else {
+        canvas += " ";
+      }
+    }
+    if (i === 0) canvas += " ".repeat(20) + score;
+    canvas += "\n";
+  }
+  console.log("\n".repeat(50));
+  console.log(canvas);
+};
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+let direction = DIRECTIONS.STOP;
+
+const runGame = async () => {
+  const field = {};
+  const gen = runProgram(2);
+  let val = gen.next();
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let score = 0;
+  let fieldDone = false;
+  let ballX = -1;
+  let ballY = -1;
+  let paddleX = -1;
+
+  while (!val.done) {
+    switch (val.value.type) {
+      case "o": {
+        const x = val.value.val;
+        val = gen.next();
+        const y = val.value.val;
+        val = gen.next();
+        const value = val.value.val;
+        val = gen.next();
+
+        if (x === -1 && y === 0) {
+          score = value;
+          fieldDone = true;
+        } else {
+          maxX = Math.max(x, maxX);
+          maxY = Math.max(y, maxY);
+          if (!field[y]) field[y] = {};
+          field[y][x] = value;
+
+          if (value === OBJECTS.BALL) {
+            ballX = x;
+            ballY = y;
+          }
+
+          if (value === OBJECTS.PADDLE) {
+            paddleX = x;
+          }
+        }
+
+        break;
+      }
       case "i": {
-        // val = gen.next(getColor(field, x, y) === WHITE ? 1 : 0);
+        let dir = DIRECTIONS.STOP;
+
+        if (automatic) {
+          if (ballX > paddleX) {
+            dir = DIRECTIONS.RIGHT;
+          } else if (ballX === paddleX) {
+            dir = DIRECTIONS.STOP;
+          } else {
+            dir = DIRECTIONS.LEFT;
+          }
+        } else {
+          dir = direction;
+        }
+
+        val = gen.next(dir);
         break;
       }
       default: {
         val = gen.next();
       }
     }
-  }
 
-  return { field, size: { x: maxX + 1, y: maxY + 1 } };
+    if (fieldDone) {
+      drawField(field, { x: maxX + 1, y: maxY + 1 }, score);
+      await delay(5);
+    }
+  }
 };
 
 const calcBlocksField = (field, size) => {
@@ -164,21 +279,53 @@ const calcBlocksField = (field, size) => {
   return blocks;
 };
 
-const drawField = (field, size) => {
-  let canvas = "";
-
-  for (let i = 0; i < size.y; i++) {
-    for (let j = 0; j < size.x; j++) {
-      canvas += OBJECTS_DATA[field[i][j]].symbol;
-    }
-    canvas += "\n";
-  }
-  console.log("\n".repeat(50));
-  console.log(canvas);
-};
-
 const { field, size } = run();
 
 // part 1
 console.log(calcBlocksField(field, size)); // 363
-drawField(field, size);
+
+// part 2
+
+runGame(); // 17159
+
+if (!automatic) {
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+
+  process.stdin.on("keypress", (str, key) => {
+    if (key.ctrl && key.name === "c") {
+      process.exit();
+    } else {
+      if (DIRECTIONS_DATA[DIRECTIONS.STOP][key.name])
+        direction = DIRECTIONS.STOP;
+      if (DIRECTIONS_DATA[DIRECTIONS.LEFT][key.name])
+        direction = DIRECTIONS.LEFT;
+      if (DIRECTIONS_DATA[DIRECTIONS.RIGHT][key.name])
+        direction = DIRECTIONS.RIGHT;
+    }
+  });
+}
+
+// ###########################################                    17159
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                         *               #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                                         #
+// #                         =               #
+// #                                         #
