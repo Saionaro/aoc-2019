@@ -25,7 +25,7 @@
   let blockSizeX = 0;
   let blockSizeY = 0;
 
-  function createHiDPICanvas(w, h) {
+  const createHiDPICanvas = (w, h) => {
     const canvas = document.createElement("canvas");
     canvas.width = w * PIXEL_RATIO;
     canvas.height = h * PIXEL_RATIO;
@@ -35,7 +35,7 @@
     context.lineJoin = "round";
     context.setTransform(PIXEL_RATIO, 0, 0, PIXEL_RATIO, 0, 0);
     return canvas;
-  }
+  };
 
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 

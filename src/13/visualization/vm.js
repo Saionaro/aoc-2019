@@ -13,7 +13,7 @@
   const getValue = (data, mode = "0", index, base = 0) =>
     data[getPosition(data, mode, index, base)];
 
-  function* runProgram(program, input) {
+  const runProgram = function* runProgram(program, input) {
     const copy = [...program];
     if (input) copy[0] = input;
     let base = 0;
@@ -94,7 +94,7 @@
     }
 
     throw new Error("There is no output signal");
-  }
+  };
 
   window.runProgram = runProgram;
 }
