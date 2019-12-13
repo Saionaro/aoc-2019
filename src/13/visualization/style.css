@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  height: 100%;
+  background-color: #000000;
+}
+
+.field canvas {
+  margin: auto;
+}
+
+.score {
+  position: fixed;
+  top: 0;
+  right: 0;
+  font-family: monospace;
+  font-size: 50;
+  color: #ffffff;
+}
