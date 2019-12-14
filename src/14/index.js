@@ -58,4 +58,17 @@ const calc = (reagent, inputAmount, extras) => {
   return count;
 };
 
+// part 1
+
 console.log(calc(FUEL, 1, {})); //  1185296
+
+// part 2
+
+let count = 0;
+let res = 0;
+
+while (res < 1000000000000) {
+  res = calc(FUEL, ++count, {});
+}
+
+console.log(count - 1); //  1376631
