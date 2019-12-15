@@ -29,7 +29,7 @@ const OBJECTS_DATA = {
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const drawField = (field, pos = {}, size, stops = {}) => {
+const drawField = (field, pos = {}, size, visited = {}, oxy = {}) => {
   let canvas = "";
 
   for (let i = size.minY; i <= size.maxY; i++) {
@@ -38,7 +38,7 @@ const drawField = (field, pos = {}, size, stops = {}) => {
         canvas += "D";
       } else if (j === 0 && i === 0) {
         canvas += "S";
-      } else if (stops[i] && stops[i][j]) {
+      } else if (visited[i] && visited[i][j]) {
         canvas += "x";
       } else if (
         field[i] &&
@@ -91,6 +91,15 @@ const isInteresting = (field, point, visited) => {
   return isUndefined && !isVisited;
 };
 
+const isEmpty = (field, point, visited) => {
+  const empty = field[point.y] && field[point.y][point.x] === OBJECTS.EMPTY;
+  const isVisited = visited[point.y]
+    ? Boolean(visited[point.y][point.x])
+    : false;
+
+  return empty && !isVisited;
+};
+
 const visited = { 0: { 0: true } };
 const oCoords = { x: -1, y: -1 };
 const field = { 0: { 0: OBJECTS.EMPTY } };
@@ -131,9 +140,7 @@ const run = async (vm, x = 0, y = 0, dir = DIRECTIONS.NORTH, steps = 0) => {
 
           console.log(steps);
 
-          if (ANIMATE) {
-            drawField(field, {}, { minX, minY, maxX, maxY });
-          }
+          if (ANIMATE) drawField(field, {}, { minX, minY, maxX, maxY });
 
           return true;
         }
@@ -186,4 +193,28 @@ const run = async (vm, x = 0, y = 0, dir = DIRECTIONS.NORTH, steps = 0) => {
   }
 };
 
-run(new VM(data)); // 204
+run(new VM(data)).then(() => {
+  // part 1
+  // 204
+  const oxy = {
+    [oCoords.y]: { [oCoords.x]: true }
+  };
+
+  const getDepth = (point, depth = 0) => {
+    let depthLocal = depth;
+
+    for (const direction of DIRECTIONS_LIST) {
+      const target = getTargetCoords(point.x, point.y, direction);
+
+      if (isEmpty(field, target, oxy)) {
+        if (!oxy[target.y]) oxy[target.y] = {};
+        oxy[target.y][target.x] = true;
+        depthLocal = Math.max(depthLocal, getDepth(target, depth + 1));
+      }
+    }
+
+    return depthLocal;
+  };
+
+  console.log(getDepth(oCoords, 0)); // part 2 340
+});
