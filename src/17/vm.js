@@ -20,6 +20,10 @@ class VM {
     return this.data[this.getPosition(mode, index)];
   }
 
+  setInput(input) {
+    this.data[0] = input;
+  }
+
   clone() {
     return new VM(this.data, this.base, this.i);
   }
