@@ -9,11 +9,6 @@ const OBJECTS = {
   PULLED: 1
 };
 
-const OBJECTS_DATA = {
-  [OBJECTS.STAT]: { symbol: "." },
-  [OBJECTS.PULLED]: { symbol: "#" }
-};
-
 const run = (vm, input = []) => {
   const gen = vm.run();
   let val = gen.next();
@@ -35,18 +30,6 @@ const run = (vm, input = []) => {
   }
 };
 
-const drawField = field => {
-  let canvas = "";
-  for (let row of field) {
-    for (let item of row) {
-      canvas += OBJECTS_DATA[item].symbol;
-    }
-    canvas += "\n";
-  }
-
-  console.log(canvas);
-};
-
 const solve1 = () => {
   let count = 0;
 
@@ -61,3 +44,39 @@ const solve1 = () => {
 };
 
 console.log(solve1()); // 206
+
+const checkLine = y => {
+  let count = 0;
+  let start = -1;
+  let end = -1;
+
+  for (let j = 0; j < 1000; j++) {
+    const res = run(new VM(data), [y, j]);
+
+    if (res === OBJECTS.PULLED) {
+      count++;
+
+      if (start === -1) start = j;
+      end = j;
+    }
+  }
+
+  return { count, start, end };
+};
+
+const checkArea = y => {
+  const stats1 = checkLine(y);
+  const stats2 = checkLine(y + 99);
+  return { diff: stats1.end - stats2.start, 1: stats1, 2: stats2 };
+};
+
+const solve2 = () => {
+  for (let i = 900; i < 1000; i++) {
+    const data = checkArea(i);
+    if (data.diff === 99) {
+      return data[2].start * 10000 + i;
+    }
+  }
+};
+
+console.log(solve2()); // 6190948
